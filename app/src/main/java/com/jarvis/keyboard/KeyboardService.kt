@@ -9,6 +9,8 @@ import android.os.SystemClock
 import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputMethodManager
@@ -47,6 +49,8 @@ class KeyboardService : InputMethodService(), RadialKeyboardView.KeyListener {
 
     /** True while the greeting owns the strip: from opening on an empty field until the user types something. */
     private var greetingActive = false
+
+    private var emojiPanel: EmojiPanel? = null
     private var swapSpace = false          // a suggestion just added a trailing space that punctuation may replace
     private var learnResetSeen = 0
 
@@ -73,8 +77,48 @@ class KeyboardService : InputMethodService(), RadialKeyboardView.KeyListener {
         val v = RadialKeyboardView(this)
         v.keyListener = this
         view = v
+        val panel = EmojiPanel(this, ::commitEmoji, ::backspace, ::hideEmoji)
+        panel.visibility = View.GONE
+        emojiPanel = panel
+        // The emoji panel is stacked on the keyboard and takes exactly its size (the keyboard stays measured while hidden)
+        val root = object : FrameLayout(this) {
+            override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+                val width = MeasureSpec.getSize(widthMeasureSpec)
+                val exactWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
+                v.measure(exactWidth, heightMeasureSpec)
+                val keyboardHeight = v.measuredHeight
+                panel.measure(exactWidth, MeasureSpec.makeMeasureSpec(keyboardHeight, MeasureSpec.EXACTLY))
+                setMeasuredDimension(
+                    resolveSize(width, widthMeasureSpec),
+                    keyboardHeight
+                )
+            }
+        }
+        root.addView(v, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        root.addView(panel, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
         pushState()
-        return v
+        return root
+    }
+
+    private fun showEmoji() {
+        val p = emojiPanel ?: return
+        p.applyTheme(ThemeManager.byId(settings.themeId))
+        view?.visibility = View.INVISIBLE
+        p.visibility = View.VISIBLE
+    }
+
+    private fun hideEmoji() {
+        emojiPanel?.visibility = View.GONE
+        view?.visibility = View.VISIBLE
+    }
+
+    private fun commitEmoji(emoji: String) {
+        val ic = currentInputConnection ?: return
+        greetingActive = false
+        swapSpace = false
+        ic.commitText(emoji, 1)
+        updateAutoShift()
+        scheduleRefresh()
     }
 
     /** Never take over the screen in landscape; the radial panel scales down instead. */
@@ -91,7 +135,10 @@ class KeyboardService : InputMethodService(), RadialKeyboardView.KeyListener {
             engine.user.clear()
         }
         configureForEditor(info)
-        if (!restarting) greetingActive = shouldGreet()
+        if (!restarting) {
+            hideEmoji()
+            greetingActive = shouldGreet()
+        }
         if (!restarting) {
             val cls = (info?.inputType ?: 0) and InputType.TYPE_MASK_CLASS
             layer = when (cls) {
@@ -149,6 +196,7 @@ class KeyboardService : InputMethodService(), RadialKeyboardView.KeyListener {
             KeyType.PASTE -> editAction(android.R.id.paste)
             KeyType.DEL_WORD -> deleteWord()
             KeyType.HIDE -> requestHideSelf(0)
+            KeyType.EMOJI -> showEmoji()
         }
     }
 

@@ -3,7 +3,7 @@ package com.jarvis.keyboard
 enum class KeyType {
     CHAR, SPACE, SHIFT, BACKSPACE, ENTER,
     MODE_NUM, MODE_SYM, LANG, SETTINGS, CURSOR_LEFT, CURSOR_RIGHT,
-    SELECT_ALL, COPY, CUT, PASTE, DEL_WORD, HIDE
+    SELECT_ALL, COPY, CUT, PASTE, DEL_WORD, HIDE, EMOJI
 }
 
 enum class Layer { LETTERS, NUMBERS, SYMBOLS }
@@ -45,11 +45,12 @@ object KeyboardLayouts {
 
     /**
      * The tools on the rotating dial, in ring order. Slots 0-2 are visible at rest; dragging the dial
-     * brings the others into view. 12 tools x 30 degrees = one full turn.
+     * brings the others into view. The ring is divided evenly between however many tools there are.
      */
     val dialTools: List<KeyDef> = listOf(
         KeyDef(KeyType.LANG, "LANG"),
         KeyDef(KeyType.MODE_NUM, "123"),
+        KeyDef(KeyType.EMOJI, "EMOJI"),
         KeyDef(KeyType.MODE_SYM, "#+="),
         KeyDef(KeyType.CURSOR_LEFT, "<"),
         KeyDef(KeyType.CURSOR_RIGHT, ">"),

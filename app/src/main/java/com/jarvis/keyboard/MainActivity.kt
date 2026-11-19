@@ -173,7 +173,7 @@ class MainActivity : Activity() {
         col.addView(label(
             "Keys: type as usual. Shift and backspace sit at the ends of the third row, enter at the end of the bottom row.\n\n" +
                 "Left dial: tap a tool (language, 123, #+=), or hold and drag the dial to rotate it and bring more tools into view " +
-                "(cursor arrows, select all, copy, cut, paste, delete word, hide keyboard, settings). " +
+                "(emoji picker, cursor arrows, select all, copy, cut, paste, delete word, hide keyboard, settings). " +
                 "Hold the globe for the keyboard picker. Double-tap or hold SHIFT (left end of the third row) for caps lock.\n\n" +
                 "Suggestions: tap one to insert it. Hold a letter for its number or punctuation twin.",
             13f, dim

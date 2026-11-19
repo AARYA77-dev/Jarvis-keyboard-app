@@ -3,4 +3,10 @@
     <style name="AppTheme" parent="@android:style/Theme.DeviceDefault.NoActionBar">
         <item name="android:windowBackground">@android:color/black</item>
     </style>
+
+    <!-- Only used for the emoji picker: it expects AppCompat theme attributes -->
+    <style name="EmojiPickerTheme" parent="Theme.AppCompat">
+        <item name="colorControlNormal">#8FD8EA</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 </resources>

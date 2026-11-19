@@ -1,7 +1,7 @@
 # JARVIS – Radial Android Keyboard
 
 A real Android system keyboard (InputMethodService) drawn entirely with Canvas: a suggestion strip, four
-gently curved key rows that run edge to edge, and one rotating tool dial in the bottom-left corner. No third-party dependencies.
+gently curved key rows that run edge to edge, and one rotating tool dial in the bottom-left corner. Emoji picker: AndroidX `emoji2-emojipicker` (opened from the dial).
 
 ## Build and install
 1. Android Studio (current stable) → **Open** this folder → let Gradle sync (JDK 17; Studio's bundled JDK works).
@@ -56,4 +56,4 @@ Android 13+, plus PNG fallbacks in `res/mipmap-*dpi` for Android 7.x.
 
 ## Known limitations
 - No autocorrect-on-space or swipe typing yet; no accented-letter long-press (accents come through suggestions).
-- Landscape shows the same panel centred rather than stretched. No emoji panel.
+- Landscape shows the same panel centred rather than stretched.

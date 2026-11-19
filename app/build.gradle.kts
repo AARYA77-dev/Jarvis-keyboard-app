@@ -32,4 +32,9 @@ android {
     }
 }
 
-// Zero third-party dependencies on purpose: everything is framework Canvas + Kotlin stdlib.
+dependencies {
+    // Emoji picker (Google's AndroidX library): categories, skin tones, recents, current Unicode emoji.
+    implementation("androidx.emoji2:emoji2-emojipicker:1.5.0")
+    // The picker is styled with AppCompat theme attributes; its theme is applied only to the emoji panel.
+    implementation("androidx.appcompat:appcompat:1.7.0")
+}

@@ -214,7 +214,7 @@ class RadialKeyboardView(context: Context) : View(context), KeyboardTouchHandler
         val w = MeasureSpec.getSize(widthMeasureSpec)
         val screenH = resources.displayMetrics.heightPixels
         // Fan height follows the width, but never more than half the screen or 300dp (tablets); the panel is centred.
-        val fanH = min(min(w * KeyboardGeometry.ASPECT, screenH * 0.52f), 300f * density)
+        val fanH = min(min(w * KeyboardGeometry.ASPECT, screenH * 0.55f), 330f * density)
         setMeasuredDimension(w, (fanH + stripHeightPx).toInt() + bottomInset)
     }
 

@@ -121,8 +121,8 @@ class KeyboardGeometry {
 
         val topPad = stripH + 5f * d
         val botPad = 6f * d
-        val side = 3f * d
-        gap = 4.5f * d
+        val side = 2f * d
+        gap = 3.5f * d
         val xHalf = panelW / 2f - side
 
         // Outer arc: a chord of half-width xHalf with sagitta (edge drop) sag.
@@ -262,9 +262,10 @@ class KeyboardGeometry {
 
     companion object {
         const val ROWS = 4
-        const val ASPECT = 0.62f              // key-panel height / width (the strip is extra)
+        const val ASPECT = 0.72f              // key-panel height / width (the strip is extra)
         const val SAGITTA_FRACTION = 0.045f   // how far the row ends drop below the centre, as a share of the width
-        const val DIAL_FACTOR = 1.7f          // dial radius as a multiple of the row thickness
-        const val SLOT_DEGREES = 30f          // angular size of one dial slot
+        const val DIAL_FACTOR = 1.35f         // dial radius as a multiple of the row thickness
+        /** Angular size of one dial slot: the ring is split evenly between all tools. */
+        val SLOT_DEGREES: Float get() = 360f / KeyboardLayouts.dialTools.size
     }
 }

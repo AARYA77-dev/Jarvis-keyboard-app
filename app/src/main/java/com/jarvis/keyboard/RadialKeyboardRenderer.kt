@@ -338,6 +338,12 @@ class RadialKeyboardRenderer(context: Context) {
             moveTo(-0.35f, 0.05f); lineTo(0.35f, 0.05f)
             moveTo(-0.35f, 0.5f); lineTo(0.35f, 0.5f)
         }
+        icons[KeyType.EMOJI] = Path().apply {
+            addCircle(0f, 0f, 0.9f, Path.Direction.CW)
+            addCircle(-0.32f, -0.25f, 0.07f, Path.Direction.CW)
+            addCircle(0.32f, -0.25f, 0.07f, Path.Direction.CW)
+            addArc(RectF(-0.5f, -0.35f, 0.5f, 0.55f), 25f, 130f)
+        }
         icons[KeyType.HIDE] = Path().apply {
             moveTo(-0.7f, -0.3f); lineTo(0f, 0.4f); lineTo(0.7f, -0.3f)
             moveTo(-0.7f, 0.85f); lineTo(0.7f, 0.85f)
@@ -399,8 +405,11 @@ class RadialKeyboardRenderer(context: Context) {
         val cy = g.dialY
         val accent = theme.accent
         stroke.strokeWidth = 1.1f * d
-        for (n in 0 until 72) {
-            val ang = 270f + n * 5f + ringAngle
+        // Six ticks per slot, so the long ticks always line up with the slot edges
+        val step = KeyboardGeometry.SLOT_DEGREES / 6f
+        val count = Math.round(360f / step)
+        for (n in 0 until count) {
+            val ang = 270f + n * step + ringAngle
             val rel = ((ang - 250f) % 360f + 360f) % 360f
             if (rel > 140f) continue
             val major = n % 6 == 0
