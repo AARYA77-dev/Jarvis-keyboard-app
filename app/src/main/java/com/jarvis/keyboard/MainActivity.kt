@@ -24,9 +24,13 @@ import android.widget.SeekBar
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
 import com.jarvis.keyboard.updates.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
@@ -43,6 +47,10 @@ class MainActivity : Activity() {
     private val accent get() = ThemeManager.byId(settings.themeId).accent
     private val dim = Color.rgb(130, 160, 175)
 
+    private val updateScope = CoroutineScope(
+    SupervisorJob() + Dispatchers.Main
+)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         settings = KeyboardSettings(this)
@@ -52,6 +60,11 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         refreshStatus()
+    }
+
+    override fun onDestroy() {
+    super.onDestroy()
+    updateScope.cancel()
     }
 
     private fun buildUi(): View {
@@ -273,7 +286,7 @@ class MainActivity : Activity() {
 
     private fun checkForUpdates() {
 
-    lifecycleScope.launch {
+    updateScope.launch {
 
         Toast.makeText(
             this@MainActivity,
@@ -281,51 +294,60 @@ class MainActivity : Activity() {
             Toast.LENGTH_SHORT
         ).show()
 
-        val update = UpdateChecker.checkForUpdate(
-            this@MainActivity
-        )
+        try {
+            val update = withContext(Dispatchers.IO) {
+                UpdateChecker.checkForUpdate(this@MainActivity)
+            }
 
-        if (update == null) {
-            Toast.makeText(
-                this@MainActivity,
-                "You're using the latest version!",
-                Toast.LENGTH_LONG
-            ).show()
+            if (update == null) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "You're using the latest version!",
+                    Toast.LENGTH_LONG
+                ).show()
 
-            return@launch
-        }
+                return@launch
+            }
 
-        android.app.AlertDialog.Builder(this@MainActivity)
-            .setTitle("Update available!")
-            .setMessage(
-                "Version: ${update.versionName}\n\n" +
+            android.app.AlertDialog.Builder(this@MainActivity)
+                .setTitle("Update available!")
+                .setMessage(
+                    "Version: ${update.versionName}\n\n" +
                     update.releaseNotes
-            )
-            .setPositiveButton("Download") { _, _ ->
+                )
+                .setPositiveButton("Download") { _, _ ->
 
-                lifecycleScope.launch {
-                    try {
-                        val apkUri = ApkDownloader.download(
-                            this@MainActivity,
-                            update
-                        )
+                    updateScope.launch {
+                        try {
+                            val apkUri = ApkDownloader.download(
+                                this@MainActivity,
+                                update
+                            )
 
-                        ApkInstaller.install(
-                            this@MainActivity,
-                            apkUri
-                        )
+                            ApkInstaller.install(
+                                this@MainActivity,
+                                apkUri
+                            )
 
-                    } catch (e: Exception) {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Update failed: ${e.message}",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        } catch (e: Exception) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Update failed: ${e.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 }
-            }
-            .setNegativeButton("Later", null)
-            .show()
+                .setNegativeButton("Later", null)
+                .show()
+
+        } catch (e: Exception) {
+            Toast.makeText(
+                this@MainActivity,
+                "Update check failed: ${e.message}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 }
 }
