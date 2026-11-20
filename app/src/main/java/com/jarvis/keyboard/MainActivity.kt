@@ -24,6 +24,9 @@ import android.widget.SeekBar
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
+import com.jarvis.keyboard.updates.*
+import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -179,6 +182,12 @@ class MainActivity : Activity() {
             13f, dim
         ))
 
+        col.addView(section("APP UPDATES"))
+
+        col.addView(button("Check for Updates") {
+            checkForUpdates()
+        })
+
         return ScrollView(this).apply {
             setBackgroundColor(Color.rgb(4, 6, 10))
             fitsSystemWindows = true
@@ -261,4 +270,62 @@ class MainActivity : Activity() {
         setPadding(0, dp(8), 0, dp(8))
         setOnCheckedChangeListener { _, checked -> onChange(checked) }
     }
+
+    private fun checkForUpdates() {
+
+    lifecycleScope.launch {
+
+        Toast.makeText(
+            this@MainActivity,
+            "Checking for updates...",
+            Toast.LENGTH_SHORT
+        ).show()
+
+        val update = UpdateChecker.checkForUpdate(
+            this@MainActivity
+        )
+
+        if (update == null) {
+            Toast.makeText(
+                this@MainActivity,
+                "You're using the latest version!",
+                Toast.LENGTH_LONG
+            ).show()
+
+            return@launch
+        }
+
+        android.app.AlertDialog.Builder(this@MainActivity)
+            .setTitle("Update available!")
+            .setMessage(
+                "Version: ${update.versionName}\n\n" +
+                    update.releaseNotes
+            )
+            .setPositiveButton("Download") { _, _ ->
+
+                lifecycleScope.launch {
+                    try {
+                        val apkUri = ApkDownloader.download(
+                            this@MainActivity,
+                            update
+                        )
+
+                        ApkInstaller.install(
+                            this@MainActivity,
+                            apkUri
+                        )
+
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Update failed: ${e.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+            .setNegativeButton("Later", null)
+            .show()
+    }
+}
 }

@@ -48,4 +48,6 @@ dependencies {
     implementation("androidx.emoji2:emoji2-emojipicker:1.5.0")
     // The picker is styled with AppCompat theme attributes; its theme is applied only to the emoji panel.
     implementation("androidx.appcompat:appcompat:1.7.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 }
